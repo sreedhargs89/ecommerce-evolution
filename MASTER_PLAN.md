@@ -2,6 +2,23 @@
 
 This project demonstrates the evolution of an e-commerce backend from a simple script to a complex, scalable microservices architecture. Each stage represents a branch in this repository.
 
+## 📊 Progress Tracker
+
+| Phase | Stage | Description | Status | Branch |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1: App** | 1 (MVP) | Monolith, No DB | ✅ Done | `stage-1-mvp` |
+| | 2 (Startup) | Monolith + Persistence | ✅ Done | `stage-2-database` |
+| | 3 (Growth) | Microservices + Docker | ✅ Done | `stage-3-microservices` |
+| | 4 (Scale) | API Gateway + Redis + Rate Limiting | ✅ Done | `stage-4-gateway` |
+| | 5 (Enterprise) | Async + Sharding | ⏳ Planned | - |
+| **Phase 2: Ops** | 6 (K8s) | Kubernetes Migration | ⏳ Planned | - |
+| | 7 (Mesh) | Istio + ArgoCD | ⏳ Planned | - |
+| | 8 (Observe) | Prometheus/Grafana/Jaeger | ⏳ Planned | - |
+| **Phase 3: AI** | 9 (AI SRE) | Agentic Infra + MCP | ⏳ Planned | - |
+| **Phase 4: Staff** | 10 (Resiliency) | Circuit Breakers & Chaos | ⏳ Planned | - |
+| | 11 (Flags) | Feature Flags | ⏳ Planned | - |
+| | 12 (Data) | CDC & Real-Time Analytics | ⏳ Planned | - |
+
 ## The Goal
 Build a robust e-commerce platform with 4 core domains:
 1.  **Users** (Auth, Profiles)
