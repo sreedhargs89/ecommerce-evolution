@@ -1,86 +1,132 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Depends
+from sqlmodel import SQLModel, Field, Session, create_engine, select
 from typing import List, Optional
-import uuid
 
-app = FastAPI(title="E-Commerce Stage 1: MVP (In-Memory)")
+app = FastAPI(title="E-Commerce Stage 2: Database Persistence")
 
-# --- In-Memory Database ---
-users_db = []
-products_db = []
-orders_db = []
+# --- Database Setup ---
+sqlite_file_name = "ecommerce.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+
+engine = create_engine(sqlite_url, echo=True)
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 # --- Models ---
-class User(BaseModel):
-    id: Optional[str] = None
+
+class User(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     username: str
     email: str
 
-class Product(BaseModel):
-    id: Optional[str] = None
-    name: str
+class Product(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(index=True)
     price: float
     description: str
 
-class OrderItem(BaseModel):
-    product_id: str
+class Order(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    status: str = "pending"
+    total_price: float = 0.0
+
+class OrderItem(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    order_id: int = Field(foreign_key="order.id")
+    product_id: int = Field(foreign_key="product.id")
     quantity: int
 
-class Order(BaseModel):
-    id: Optional[str] = None
-    user_id: str
-    items: List[OrderItem]
-    total_price: float = 0.0
-    status: str = "pending"
+# --- Pydantic Schemas for Requests (to handle nested data) ---
+from pydantic import BaseModel
+class OrderItemCreate(BaseModel):
+    product_id: int
+    quantity: int
+
+class OrderCreate(BaseModel):
+    user_id: int
+    items: List[OrderItemCreate]
+
+# --- Lifecycle ---
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 # --- Routes: Users ---
 @app.post("/users", response_model=User)
-def create_user(user: User):
-    user.id = str(uuid.uuid4())
-    users_db.append(user)
+def create_user(user: User, session: Session = Depends(get_session)):
+    session.add(user)
+    session.commit()
+    session.refresh(user)
     return user
 
 @app.get("/users", response_model=List[User])
-def list_users():
-    return users_db
+def list_users(session: Session = Depends(get_session)):
+    users = session.exec(select(User)).all()
+    return users
 
 # --- Routes: Products ---
 @app.post("/products", response_model=Product)
-def create_product(product: Product):
-    product.id = str(uuid.uuid4())
-    products_db.append(product)
+def create_product(product: Product, session: Session = Depends(get_session)):
+    session.add(product)
+    session.commit()
+    session.refresh(product)
     return product
 
 @app.get("/products", response_model=List[Product])
-def list_products():
-    return products_db
+def list_products(session: Session = Depends(get_session)):
+    products = session.exec(select(Product)).all()
+    return products
 
 # --- Routes: Orders ---
 @app.post("/orders", response_model=Order)
-def create_order(order: Order):
-    # Verify User
-    user = next((u for u in users_db if u.id == order.user_id), None)
+def create_order(order_data: OrderCreate, session: Session = Depends(get_session)):
+    # 1. Verify User
+    user = session.get(User, order_data.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Calculate Total & Verify Products
-    total = 0.0
-    for item in order.items:
-        product = next((p for p in products_db if p.id == item.product_id), None)
-        if not product:
-            raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
-        total += product.price * item.quantity
+    # 2. Create Order Object
+    order = Order(user_id=order_data.user_id, status="pending")
+    session.add(order)
+    session.commit()
+    session.refresh(order)
     
-    order.id = str(uuid.uuid4())
+    # 3. Process Items & Calculate Total
+    total = 0.0
+    for item_data in order_data.items:
+        product = session.get(Product, item_data.product_id)
+        if not product:
+            # Rollback in a real app or handle error
+            raise HTTPException(status_code=404, detail=f"Product {item_data.product_id} not found")
+        
+        # Check inventory here if we had it
+        
+        order_item = OrderItem(
+            order_id=order.id,
+            product_id=product.id,
+            quantity=item_data.quantity
+        )
+        session.add(order_item)
+        total += product.price * item_data.quantity
+        
     order.total_price = total
     order.status = "confirmed"
-    orders_db.append(order)
+    session.add(order)
+    session.commit()
+    session.refresh(order)
     return order
 
 @app.get("/orders", response_model=List[Order])
-def list_orders():
-    return orders_db
+def list_orders(session: Session = Depends(get_session)):
+    orders = session.exec(select(Order)).all()
+    return orders
 
 @app.get("/")
 def home():
-    return {"message": "Welcome to E-Commerce Stage 1: The Monolith MVP"}
+    return {"message": "Welcome to E-Commerce Stage 2: Database Persistence (SQLite)"}

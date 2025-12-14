@@ -1,9 +1,14 @@
-# Stage 1: The MVP (Monolith)
+# Stage 2: The Startup (Database)
 
-This is the simplest possible version of our e-commerce app.
-*   **Architecture**: Monolith (Single file)
-*   **Database**: In-Memory (Python Lists)
-*   **Scale**: 1 User (Proof of Concept)
+We have evolved from in-memory lists to a persistent Relational Database (SQLite).
+*   **Architecture**: Monolith (Single file) with DB.
+*   **Database**: SQLite (File-based, persistent).
+*   **Scale**: 10-100 Users (Small Business).
+
+## Changes from Stage 1
+*   Introduced `SQLModel` (ORM) for database interactions.
+*   Defined Tables: `User`, `Product`, `Order`, `OrderItem`.
+*   Data persists after server restart in `ecommerce.db`.
 
 ## How to Run
 
@@ -16,16 +21,12 @@ This is the simplest possible version of our e-commerce app.
     ```bash
     uvicorn main:app --reload
     ```
+    *The database file `ecommerce.db` will be created automatically.*
 
 3.  Open Swagger UI:
-    Visit `http://127.0.0.1:8000/docs` to interact with the API.
+    `http://127.0.0.1:8000/docs`
 
-## Features
-*   Create Users
-*   Add Products
-*   Place Orders
-
-## Limitations
-*   Data is lost when server restarts (In-Memory).
-*   No concurrency handling.
-*   No input validation beyond basic types.
+## Data Modeling
+We now have relationships:
+*   Orders belong to Users.
+*   Orders have many Items (linked to Products).
