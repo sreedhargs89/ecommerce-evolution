@@ -33,9 +33,25 @@ async def proxy_request(service_url: str, path: str, method: str, payload: dict 
         except httpx.RequestError:
             raise HTTPException(status_code=503, detail="Service Unavailable")
 
+# --- Helper: Rate Limiter ---
+async def check_rate_limit(request: Request, limit: int = 10, window: int = 60):
+    client_ip = request.client.host
+    key = f"rate_limit:{client_ip}"
+    
+    # Increment count
+    current_count = redis_client.incr(key)
+    
+    # Set expiration on first request
+    if current_count == 1:
+        redis_client.expire(key, window)
+    
+    if current_count > limit:
+        raise HTTPException(status_code=429, detail="Too Many Requests. Slow down!")
+
 # --- Routes: Users ---
 @app.post("/users")
 async def create_user(request: Request):
+    await check_rate_limit(request, limit=5, window=60) # Stricter limit for user creation!
     payload = await request.json()
     data, status = await proxy_request(USER_SERVICE_URL, "/users", "POST", payload)
     if status != 200:
@@ -45,6 +61,7 @@ async def create_user(request: Request):
 @app.get("/users/{user_id}")
 async def get_user(user_id: int):
     # TODO: Add Authentication Check Here
+    # Note: No Request object here to get IP easily in this simple signature, skipping RL for now for simplicity
     data, status = await proxy_request(USER_SERVICE_URL, f"/users/{user_id}", "GET")
     if status != 200:
         raise HTTPException(status_code=status, detail=data)
@@ -72,6 +89,7 @@ async def list_products():
 
 @app.post("/products")
 async def create_product(request: Request):
+    await check_rate_limit(request)
     payload = await request.json()
     data, status = await proxy_request(PRODUCT_SERVICE_URL, "/products", "POST", payload)
     
@@ -83,8 +101,8 @@ async def create_product(request: Request):
 # --- Routes: Orders ---
 @app.post("/orders")
 async def create_order(request: Request):
+    await check_rate_limit(request, limit=5, window=60) # Limit ordering speed
     payload = await request.json()
-    # Rate Limiting Logic could go here
     data, status = await proxy_request(ORDER_SERVICE_URL, "/orders", "POST", payload)
     if status != 200:
          raise HTTPException(status_code=status, detail=data)
