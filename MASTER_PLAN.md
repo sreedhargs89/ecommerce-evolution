@@ -227,13 +227,13 @@ graph LR
     Git -->|Pull Changes| ArgoCD[ArgoCD Controller]
     ArgoCD -->|Sync| K8s[Kubernetes Cluster]
     
-    subgraph Istio Mesh
+    subgraph IstioMesh [Istio Service Mesh]
         Ingress[Istio Ingress] -->|95% Traffic| V1[Service V1]
         Ingress -->|5% Traffic| V2["Service V2 (Canary)"]
     end
     
-    K8s --- Istio Mesh
-    style Istio Mesh fill:#ffe,stroke:#f90
+    K8s --- IstioMesh
+    style IstioMesh fill:#ffe,stroke:#f90
 ```
 
 ## 8. Stage 8: Observability (The Eyes & Ears)
