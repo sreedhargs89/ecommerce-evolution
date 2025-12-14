@@ -195,6 +195,20 @@ Managing 20 containers with Docker Compose in production is a nightmare. Restart
 *   **Action**: Convert `docker-compose.yml` to K8s Manifests (Deployments, Services, ConfigMaps).
 *   **Why?**: K8s handles "Self-Healing" (restarts crashed pods), "Rolling Updates" (no downtime), and "Scaling" (automatically adds more pods if CPU is high).
 
+### **Architecture Diagram**
+```mermaid
+graph TD
+    subgraph Kubernetes Cluster
+        Service[K8s Service (Load Balancer)] --> Pod1[Pod: Users-v1]
+        Service --> Pod2[Pod: Users-v1]
+        Service --> Pod3[Pod: Users-v2 (Rolling Update)]
+        
+        Config[ConfigMap] -.-> Pod1
+        Secret[K8s Secret] -.-> Pod1
+    end
+    style Kubernetes Cluster fill:#eef,stroke:#333
+```
+
 ## 7. Stage 7: Service Mesh & GitOps
 ### **The Scenario**
 *   **Security**: How do we ensure `Orders` service only talks to `Products` securely?
@@ -206,6 +220,22 @@ Managing 20 containers with Docker Compose in production is a nightmare. Restart
 *   **Istio**: Provides mTLS (mutual TLS) encryption between services, advanced traffic splitting (Canary/Blue-Green), and retry logic transparently.
 *   **ArgoCD**: Use Git as the "Source of Truth". Pushing to the `k8s-config` branch automatically updates the cluster.
 
+### **Architecture Diagram**
+```mermaid
+graph LR
+    Dev[Developer] -->|Push Code| Git[Git Repo]
+    Git -->|Pull Changes| ArgoCD[ArgoCD Controller]
+    ArgoCD -->|Sync| K8s[Kubernetes Cluster]
+    
+    subgraph Istio Mesh
+        Ingress[Istio Ingress] -->|95% Traffic| V1[Service V1]
+        Ingress -->|5% Traffic| V2[Service V2 (Canary)]
+    end
+    
+    K8s --- Istio Mesh
+    style Istio Mesh fill:#ffe,stroke:#f90
+```
+
 ## 8. Stage 8: Observability (The Eyes & Ears)
 ### **The Scenario**
 A user says "My order failed", but the logs are scattered across 50 pods. You have no idea where the error happened.
@@ -215,3 +245,17 @@ A user says "My order failed", but the logs are scattered across 50 pods. You ha
 *   **Metrics (Prometheus & Grafana)**: "Is CPU high? How many 500 errors per second?"
 *   **Distributed Tracing (Jaeger/OpenTelemetry)**: Track a single request ID as it jumps from Gateway -> Order -> Product -> database.
 *   **Logs (ELK/Loki)**: Centralized logging to search all service logs in one place.
+
+### **Architecture Diagram**
+```mermaid
+graph TD
+    App[Microservices] -->|Metrics| Prom[Prometheus]
+    App -->|Traces| Jaeger[Jaeger/Otel]
+    App -->|Logs| Loki[Loki/Elastic]
+    
+    Prom --> Grafana[Grafana Dashboard]
+    Jaeger --> Grafana
+    Loki --> Grafana
+    
+    style Grafana fill:#000,stroke:#fff,color:#fff
+```
