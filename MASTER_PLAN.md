@@ -199,9 +199,9 @@ Managing 20 containers with Docker Compose in production is a nightmare. Restart
 ```mermaid
 graph TD
     subgraph Kubernetes Cluster
-        Service[K8s Service (Load Balancer)] --> Pod1[Pod: Users-v1]
-        Service --> Pod2[Pod: Users-v1]
-        Service --> Pod3[Pod: Users-v2 (Rolling Update)]
+        Service["K8s Service (Load Balancer)"] --> Pod1["Pod: Users-v1"]
+        Service --> Pod2["Pod: Users-v1"]
+        Service --> Pod3["Pod: Users-v2 (Rolling Update)"]
         
         Config[ConfigMap] -.-> Pod1
         Secret[K8s Secret] -.-> Pod1
@@ -229,7 +229,7 @@ graph LR
     
     subgraph Istio Mesh
         Ingress[Istio Ingress] -->|95% Traffic| V1[Service V1]
-        Ingress -->|5% Traffic| V2[Service V2 (Canary)]
+        Ingress -->|5% Traffic| V2["Service V2 (Canary)"]
     end
     
     K8s --- Istio Mesh
