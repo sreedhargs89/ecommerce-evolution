@@ -4,20 +4,17 @@ This project demonstrates the evolution of an e-commerce backend from a simple s
 
 ## 📊 Progress Tracker
 
-| Phase | Stage | Description | Status | Branch |
-| :--- | :--- | :--- | :--- | :--- |
-| **Phase 1: App** | 1 (MVP) | Monolith, No DB | ✅ Done | `stage-1-mvp` |
-| | 2 (Startup) | Monolith + Persistence | ✅ Done | `stage-2-database` |
-| | 3 (Growth) | Microservices + Docker | ✅ Done | `stage-3-microservices` |
-| | 4 (Scale) | API Gateway + Redis + Rate Limiting | ✅ Done | `stage-4-gateway` |
-| | 5 (Enterprise) | Async + Sharding | ⏳ Planned | - |
-| **Phase 2: Ops** | 6 (K8s) | Kubernetes Migration | ⏳ Planned | - |
-| | 7 (Mesh) | Istio + ArgoCD | ⏳ Planned | - |
-| | 8 (Observe) | Prometheus/Grafana/Jaeger | ⏳ Planned | - |
-| **Phase 3: AI** | 9 (AI SRE) | Agentic Infra + MCP | ⏳ Planned | - |
-| **Phase 4: Staff** | 10 (Resiliency) | Circuit Breakers & Chaos | ⏳ Planned | - |
-| | 11 (Flags) | Feature Flags | ⏳ Planned | - |
-| | 12 (Data) | CDC & Real-Time Analytics | ⏳ Planned | - |
+| Phase | Stage | User Scale | Description | Status | Branch |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Phase 1: App** | [1 (MVP)](https://github.com/sreedhargs89/ecommerce-evolution/blob/stage-1-mvp/README.md) | 1 | Monolith, No DB | ✅ Done | `stage-1-mvp` |
+| | [2 (Startup)](https://github.com/sreedhargs89/ecommerce-evolution/blob/stage-2-database/README.md) | 100 | Monolith + Persistence | ✅ Done | `stage-2-database` |
+| | [3 (Growth)](https://github.com/sreedhargs89/ecommerce-evolution/blob/stage-3-microservices/README.md) | 1,000 | Microservices + Docker | ✅ Done | `stage-3-microservices` |
+| | [4 (Scale)](https://github.com/sreedhargs89/ecommerce-evolution/blob/stage-4-gateway/README.md) | 10,000 | API Gateway + Redis + Rate Limiting | ✅ Done | `stage-4-gateway` |
+| | 5 (Enterprise) | 1,000,000+ | Async + Sharding | ⏳ Planned | - |
+| **Phase 2: Ops** | 6 (K8s) | 1M+ | Kubernetes Migration | ⏳ Planned | - |
+| | 7 (Mesh) | 1M+ | Istio + ArgoCD | ⏳ Planned | - |
+| | 8 (Observe) | 1M+ | Prometheus/Grafana/Jaeger | ⏳ Planned | - |
+| **Phase 3: AI** | 9 (AI SRE) | 1M+ | Agentic Infra + MCP | ⏳ Planned | - |
 
 ## The Goal
 Build a robust e-commerce platform with 4 core domains:
