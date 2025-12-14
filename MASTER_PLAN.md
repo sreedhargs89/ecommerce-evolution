@@ -288,13 +288,13 @@ We deploy an **AI SRE Agent** that lives inside the cluster (or connects to it).
 ### **Architecture Diagram**
 ```mermaid
 graph LR
-    User[On-Call Dev] -->|Chat: 'Fix it'| Agent[AI SRE Agent (LLM)]
+    User["On-Call Dev"] -->|Chat: 'Fix it'| Agent["AI SRE Agent (LLM)"]
     
-    Agent <-->|MCP Protocol| K8sServer[K8s MCP Server]
+    Agent <-->|MCP Protocol| K8sServer["K8s MCP Server"]
     Agent <-->|Read| Observability[Prometheus/Loki]
-    Agent <-->|RAG| Runbooks[(Vector DB / Docs)]
+    Agent <-->|RAG| Runbooks[("Vector DB / Docs")]
     
-    K8sServer -->|Action: Restart/Patch| Cluster[Production Cluster]
+    K8sServer -->|Action: Restart/Patch| Cluster["Production Cluster"]
     
     style Agent fill:#f9f,stroke:#333,stroke-width:3px
     style K8sServer fill:#bbf,stroke:#333
