@@ -52,7 +52,15 @@ graph TD
          -d '{"user_id": 1, "product_id": 1, "quantity": 1}'
     ```
 
+4.  **Test Rate Limiting (DoS Protection)**
+    Run the order command 6 times quickly. On the 6th try, you will get:
+    ```json
+    {"detail": "Too Many Requests. Slow down!"}
+    ```
+
 ## Key Benefits
 *   **Simplified Usage**: Client only needs `localhost:8080`.
 *   **Performance**: Product catalog is cached.
-*   **Security**: Backend services are unreachable directly.
+*   **Security**: 
+    *   Backend services are hidden.
+    *   **Rate Limiting** protects against abuse (5 req/min for Orders).
