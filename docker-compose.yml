@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  users:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.users.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./services/users:/app/services/users
+    networks:
+      - ecommerce-net
+
+  products:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.products.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./services/products:/app/services/products
+    networks:
+      - ecommerce-net
+
+  orders:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.orders.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./services/orders:/app/services/orders
+    environment:
+      - USER_SERVICE_URL=http://users:8000
+      - PRODUCT_SERVICE_URL=http://products:8000
+      - PAYMENT_SERVICE_URL=http://payments:8000
+    depends_on:
+      - users
+      - products
+      - payments
+    networks:
+      - ecommerce-net
+
+  payments:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.payments.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8004:8000"
+    volumes:
+      - ./services/payments:/app/services/payments
+    networks:
+      - ecommerce-net
+
+networks:
+  ecommerce-net:
+    driver: bridge

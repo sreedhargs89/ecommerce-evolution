@@ -1,32 +1,36 @@
-# Stage 2: The Startup (Database)
+# Stage 3: The Growth (Microservices)
 
-We have evolved from in-memory lists to a persistent Relational Database (SQLite).
-*   **Architecture**: Monolith (Single file) with DB.
-*   **Database**: SQLite (File-based, persistent).
-*   **Scale**: 10-100 Users (Small Business).
+We have split the monolith into 4 distinct microservices.
+*   **Architecture**: Microservices (Managed by Docker Compose).
+*   **communication**: HTTP (REST) via `httpx`.
+*   **Database**: Database-per-service (4 separate SQLite files).
+*   **Scale**: 100-1,000 Users.
 
-## Changes from Stage 1
-*   Introduced `SQLModel` (ORM) for database interactions.
-*   Defined Tables: `User`, `Product`, `Order`, `OrderItem`.
-*   Data persists after server restart in `ecommerce.db`.
+## Architecture
+See `MASTER_PLAN.md` for the diagram.
+1.  **Users Service** (Port 8001): Manages user profiles.
+2.  **Products Service** (Port 8002): Manages catalog.
+3.  **Orders Service** (Port 8003): Orchestrator. Calls Users, Products, and Payments.
+4.  **Payments Service** (Port 8004): Handle transactions.
 
 ## How to Run
 
-1.  Install dependencies:
+1.  **Start the Cluster**:
     ```bash
-    pip install -r requirements.txt
+    docker-compose up --build
     ```
 
-2.  Run the server:
-    ```bash
-    uvicorn main:app --reload
-    ```
-    *The database file `ecommerce.db` will be created automatically.*
+2.  **Test the Flow**:
+    *   **Create User**:
+        `POST http://localhost:8001/users` -> `{"username": "alice", "email": "alice@example.com"}`
+    *   **Create Product**:
+        `POST http://localhost:8002/products` -> `{"name": "Laptop", "price": 1000, "description": "Fast"}`
+    *   **Place Order** (The Magic Happens Here):
+        `POST http://localhost:8003/orders` -> `{"user_id": 1, "product_id": 1, "quantity": 1}`
 
-3.  Open Swagger UI:
-    `http://127.0.0.1:8000/docs`
+    *Watch the `orders` service logs to see it calling the other services!*
 
-## Data Modeling
-We now have relationships:
-*   Orders belong to Users.
-*   Orders have many Items (linked to Products).
+## Key Changes from Stage 2
+*   **Decoupling**: Services can't access each other's database. They MUST use the API.
+*   **Orchestration**: `docker-compose` manages the lifecycle and network.
+*   **Fault Isolation**: If `products` service crashes, `users` service still works (though orders will fail).
