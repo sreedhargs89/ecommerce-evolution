@@ -1,4 +1,4 @@
-# E-Commerce Evolution: From 1 to 1 Million Users
+# E-Commerce Evolution: From 1 to 1 Million Users (+ AI SRE)
 
 This project demonstrates the evolution of an e-commerce backend from a simple script to a complex, scalable microservices architecture. Each stage represents a branch in this repository.
 
@@ -258,4 +258,44 @@ graph TD
     Loki --> Grafana
     
     style Grafana fill:#000,stroke:#fff,color:#fff
+```
+
+---
+
+# Phase 3: AI-Driven SRE & Self-Healing Infrastructure
+
+## 9. Stage 9: The Agentic Infra (AI SRE)
+### **The Scenario**
+It's 3 AM. A Kubernetes Node crashes, causing the `Orders` service to timeout. The database connection pool is full. The on-call engineer is asleep or lacks context to fix it quickly.
+
+### **The Problem**
+*   **Human Latency**: Detecting, triaging, and fixing takes too long (MTTR is high).
+*   **Skill Gaps**: Not every developer is a Kubernetes expert. They struggle to interpret `kubectl describe pod`.
+*   **Manual Toil**: Repeatedly running the same diagnostic commands (Logs, Describe, Top) is tedious.
+
+### **The Solution**
+**Agentic AI & MCP (Model Context Protocol)**.
+We deploy an **AI SRE Agent** that lives inside the cluster (or connects to it).
+*   **Kubernetes MCP Server**: Allows the LLM to run `kubectl` commands safely (read-only first, then modify with permission).
+*   **Self-Healing**: The Agent sees the error in the logs, queries the K8s state, identifies "OOMKilled", and suggests/applies a patch to increase memory limits.
+*   **Smart Triage**: Non-experts can ask "Why is checkout failing?" in plain English. The Agent investigates and explains "The Payment service is returning 500 because the API Key is invalid."
+
+### **Components**
+1.  **AI SRE Agent** (Claude/OpenAI): The brain.
+2.  **MCP Server**: The hands. Securely exposes K8s tools to the AI.
+3.  **Vector DB**: Stores "Runbooks" and historical incident data for RAG (Retrieval-Augmented Generation).
+
+### **Architecture Diagram**
+```mermaid
+graph LR
+    User[On-Call Dev] -->|Chat: 'Fix it'| Agent[AI SRE Agent (LLM)]
+    
+    Agent <-->|MCP Protocol| K8sServer[K8s MCP Server]
+    Agent <-->|Read| Observability[Prometheus/Loki]
+    Agent <-->|RAG| Runbooks[(Vector DB / Docs)]
+    
+    K8sServer -->|Action: Restart/Patch| Cluster[Production Cluster]
+    
+    style Agent fill:#f9f,stroke:#333,stroke-width:3px
+    style K8sServer fill:#bbf,stroke:#333
 ```
